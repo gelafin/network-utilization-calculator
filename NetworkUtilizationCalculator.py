@@ -52,7 +52,7 @@ def calculate_network_utilization(known_data: dict, window_size: int = None) -> 
     # if pipelining, calculate the number of packets that can be sent with the given window size
     pipelined_packet_count = 1  # default is one packet, because pipelining is optional for this function
     if window_size is not None:
-        pipelined_packet_count = window_size / packet_length
+        pipelined_packet_count = int(window_size / packet_length)
 
     # account for pipelining (if not using pipelining, this just multiplies by 1)
     utilization *= pipelined_packet_count
@@ -65,14 +65,14 @@ def main():
     # set test data
     # =============
     known_data = {
-        'length_in_bytes': 1000,
-        'rate_in_Mbps': 1000,
-        'rtt_in_ms': 15 * 2
+        'length_in_bytes': 1126,
+        'rate_in_Mbps': 10,
+        'rtt_in_ms': 14.4 * 2
     }
-    window_size_in_bytes = 5020  # set to None if not pipelining
+    window_size_in_bytes = 6353  # set to None if not pipelining
 
     # how many digits --after-- the decimal point should the answers be?
-    percentage_precision = 3
+    percentage_precision = 1
     raw_precision = 5
 
     # =============

@@ -24,7 +24,7 @@ def mibs_to_bytes(mibs: int | float):
     return mibs * 1024 * 1024  # to KiB to bytes
 
 
-def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> list:
+def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> list[tuple]:
     """
     Calculates transmission times for each file, in a continuous alternating-packet transmission network.
     The order of elements in known_data['file_sizes_bytes'] should reflect the turn order given to packet senders
@@ -42,7 +42,8 @@ def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> li
                       ],
                       'packet_payload_size_bytes': int or float,
                       'packet_header_size_bytes': int or float
-    :return: number of seconds for each file to finish transmitting
+    :return: number of seconds for each file to finish transmitting, as a list of tuples,
+             where index 0 is the time in seconds and index 1 is the turn order
     """
     # unpack known data
     total_link_rate_bps = known_data['total_link_rate_Mbps'] * 1000 * 1000  # convert to Kbps to bps
@@ -68,22 +69,40 @@ def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> li
     #     iterating in size order (because the smallest packet finishes transmitting first, etc)
     # Calculate the first one separately to initialize
     packet_count = file_order_indices_by_needed_packets_asc[0][0]
-    total_packets_at_smallest_done = packet_count * sharing_computers_count
-    total_packets_at_each_file_done = [total_packets_at_smallest_done]
-    time_when_first_done_seconds = (total_packets_at_smallest_done
-                                    * total_packet_size_bits
-                                    / total_link_rate_bps
-                                    + starting_time_seconds
-                                    )
-    times_at_each_packet_done_seconds = [time_when_first_done_seconds]
-    for size_and_order in file_order_indices_by_needed_packets_asc:
+    turn_order = file_order_indices_by_needed_packets_asc[0][1]
+    total_packets_at_file_done = packet_count * sharing_computers_count
+    total_packets_at_each_file_done = [total_packets_at_file_done]
+    time_when_file_done_seconds = (
+            total_packets_at_file_done
+            * total_packet_size_bits
+            / total_link_rate_bps
+            + starting_time_seconds
+    )
+    times_at_each_packet_done_seconds = [(time_when_file_done_seconds, turn_order)]
+    for index in range(1, len(file_order_indices_by_needed_packets_asc)):
         # this is the next smallest packet (rounded; post-rounding duplicates sorted by turn order)
-        packet_count = size_and_order[0]
+        size_and_order = file_order_indices_by_needed_packets_asc[index]
+        total_packets_needed_this_file = size_and_order[0]
+        turn_order = size_and_order[1]
+        total_packets_at_previous_done = total_packets_at_each_file_done[index - 1]
 
-        total_packets_at_this_file_done =
+        # calculate total packets this file will wait for
+        remaining_packets_this_file_at_previous_done = total_packets_needed_this_file - total_packets_at_previous_done
+        total_packets_to_finish_this_file_at_previous_done = remaining_packets_this_file_at_previous_done * (sharing_computers_count - index)
+        total_packets_at_file_done = total_packets_to_finish_this_file_at_previous_done + total_packets_at_previous_done
 
-    # account for time to send all headers for each file
+        # calculate total time for this file to finish
+        time_when_file_done_seconds = (
+                total_packets_at_file_done
+                * total_packet_size_bits
+                / total_link_rate_bps
+                + starting_time_seconds
+        )
 
+        # add to output variable
+        times_at_each_packet_done_seconds.append((time_when_file_done_seconds, turn_order))
+
+    return times_at_each_packet_done_seconds
 
 
 if __name__ == '__main__':

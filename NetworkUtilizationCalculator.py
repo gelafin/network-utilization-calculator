@@ -1,7 +1,8 @@
 # Author: Mark Mendez
 # Date: 01/27/2022
 
-def calculate_transmission_time(length_in_bytes: int, rate_in_Mbps: float) -> float:
+
+def calculate_transmission_time_simple(length_in_bytes: int, rate_in_Mbps: float) -> float:
     """
     Calculates network transmission time for a packet
     :param length_in_bytes: size of each packet --in bytes--
@@ -41,7 +42,7 @@ def calculate_network_utilization(known_data: dict, window_size: int = None) -> 
     rtt = float(known_data['rtt_in_ms'])
 
     # calculate transmission time in milliseconds
-    transmission_time = calculate_transmission_time(packet_length, rate)
+    transmission_time = calculate_transmission_time_simple(packet_length, rate)
 
     # calculate total time
     total_time = transmission_time + rtt
@@ -65,11 +66,11 @@ def main():
     # set test data
     # =============
     known_data = {
-        'length_in_bytes': 1126,
-        'rate_in_Mbps': 10,
-        'rtt_in_ms': 14.4 * 2
+        'length_in_bytes': 1076,
+        'rate_in_Mbps': 46,
+        'rtt_in_ms': 21.4 * 2
     }
-    window_size_in_bytes = 6353  # set to None if not pipelining
+    window_size_in_bytes = 8948  # set to None if not pipelining
 
     # how many digits --after-- the decimal point should the answers be?
     percentage_precision = 1
@@ -79,7 +80,7 @@ def main():
     # use test data
     # =============
     # get transmission time by itself
-    transmission_time_in_ms = calculate_transmission_time(known_data['length_in_bytes'], known_data['rate_in_Mbps'])
+    transmission_time_in_ms = calculate_transmission_time_simple(known_data['length_in_bytes'], known_data['rate_in_Mbps'])
     print(f'\ntransmission time: {transmission_time_in_ms}ms')
 
     # get utilization

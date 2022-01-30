@@ -87,7 +87,7 @@ def calculate_transmission_time_statistical_multiplexing(known_data: dict) -> li
         total_packets_at_previous_done = total_packets_at_each_file_done[index - 1]
 
         # calculate total packets this file will wait for
-        remaining_packets_this_file_at_previous_done = total_packets_needed_this_file - total_packets_at_previous_done
+        remaining_packets_this_file_at_previous_done = total_packets_needed_this_file - (total_packets_at_previous_done / sharing_computers_count)
         total_packets_to_finish_this_file_at_previous_done = remaining_packets_this_file_at_previous_done * (sharing_computers_count - index)
         total_packets_at_file_done = total_packets_to_finish_this_file_at_previous_done + total_packets_at_previous_done
 

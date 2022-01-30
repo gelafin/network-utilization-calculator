@@ -66,8 +66,8 @@ def main():
     # set test data
     # =============
     known_data = {
-        'length_in_bytes': 1076,
-        'rate_in_Mbps': 46,
+        'length_in_bytes': 1500,
+        'rate_in_Mbps': 100,
         'rtt_in_ms': 21.4 * 2
     }
     window_size_in_bytes = 8948  # set to None if not pipelining
@@ -81,12 +81,12 @@ def main():
     # =============
     # get transmission time by itself
     transmission_time_in_ms = calculate_transmission_time_simple(known_data['length_in_bytes'], known_data['rate_in_Mbps'])
-    print(f'\ntransmission time: {transmission_time_in_ms}ms')
+    print(f'\ntransmission time (ms): {transmission_time_in_ms}')
 
     # get utilization
     utilization_in_decimal = round(calculate_network_utilization(known_data, window_size_in_bytes), raw_precision)
     utilization_percentage = round(utilization_in_decimal * 100, percentage_precision)
-    print(f'\nutilization time: {utilization_in_decimal}, which is {utilization_percentage}%')
+    print(f'\nutilization (decimal): {utilization_in_decimal}, which is {utilization_percentage}%')
 
 
 if __name__ == '__main__':
